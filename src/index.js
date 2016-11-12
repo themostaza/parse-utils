@@ -1,5 +1,6 @@
-import Parse from 'parse'
 import { chunk, compact, flatten, isArray, isEmpty, isNil, range } from 'lodash'
+
+const Parse = global.Parse || require('parse')
 
 const User = Parse.Object.extend('_User')
 const Role = Parse.Object.extend('_Role')
