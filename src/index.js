@@ -1,9 +1,14 @@
 import { chunk, compact, flatten, isArray, isEmpty, isNil, range } from 'lodash'
 
-const Parse = global.Parse || require('parse')
+let Parse = global.Parse || require('parse')
 
-const User = Parse.Object.extend('_User')
-const Role = Parse.Object.extend('_Role')
+/**
+ * Set the Parse library to use (node/react-native)
+ * @param {Object} The Parse library instance
+ */
+export const setParseLib = (parseLib) => {
+  Parse = parseLib
+}
 
 /**
  * Initialize the Parse SDK.
@@ -96,6 +101,7 @@ export const uploadFile = async (fileName, file) => {
  * @return {ParseObject} The User object.
  */
 export const getUserByEmail = async (userEmail) => {
+  const User = Parse.Object.extend('_User')
   return await new Parse.Query(User)
     .equalTo('email', userEmail)
     .first()
@@ -108,6 +114,7 @@ export const getUserByEmail = async (userEmail) => {
  * @return {ParseObject} The User object.
  */
 export const getUserById = async (userId) => {
+  const User = Parse.Object.extend('_User')
   return await new Parse.Query(User)
     .equalTo('objectId', userId)
     .first()
@@ -120,6 +127,7 @@ export const getUserById = async (userId) => {
  * @return {ParseObject} The Role object.
  */
 export const getRoleByName = async (roleName) => {
+  const Role = Parse.Object.extend('_Role')
   return await new Parse.Query(Role)
     .equalTo('name', roleName)
     .first()
@@ -168,6 +176,7 @@ export const saveAllInChunks = async (parseObjects, saveOptions, chunkSize = 200
  * @return {ParseObject} - The created Role (undefined if the role already exists).
  */
 export const createRoleIfNotExists = async (roleName, saveOptions) => {
+  const Role = Parse.Object.extend('_Role')
   const doesRoleExists = await new Parse.Query(Role)
     .equalTo('name', roleName)
     .first()
@@ -196,6 +205,7 @@ export const isUserInRole = async (userId, roleName) => {
 }
 
 export default {
+  setParseLib,
   initializeParseSDK,
   uploadFile,
   createPointerFromId,
