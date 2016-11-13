@@ -1,6 +1,6 @@
 import { chunk, compact, flatten, isArray, isEmpty, isNil, range } from 'lodash'
 
-let Parse = global.Parse || require('parse')
+let Parse = global.Parse
 
 /**
  * Set the Parse library to use (node/react-native)
