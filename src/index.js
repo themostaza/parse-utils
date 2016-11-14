@@ -184,11 +184,11 @@ export const createRoleIfNotExists = async (roleName, saveOptions) => {
     return undefined
   } else {
     const role = new Role()
+    role.set('name', roleName)
     const acl = new Parse.ACL()
     acl.setPublicReadAccess(true)
     acl.setPublicWriteAccess(false)
-    role.set('name', roleName)
-    role.set('acl', acl)
+    role.setACL(acl)
     return await role.save({}, saveOptions)
   }
 }
