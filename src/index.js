@@ -184,6 +184,7 @@ export const createRoleIfNotExists = async (roleName, saveOptions) => {
     return undefined
   } else {
     const role = new Role()
+    role.set('name', roleName)
     return await role.save({}, saveOptions)
   }
 }
