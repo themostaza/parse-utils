@@ -7,11 +7,17 @@ This library is available on npm, install it with: `npm install --save parse-uti
 
 # API
 <dl>
+<dt><a href="#setParseLib">setParseLib(parseLib)</a></dt>
+<dd><p>Set the Parse library to use (node/react-native).</p>
+</dd><dl>
 <dt><a href="#initializeParseSDK">initializeParseSDK(appId, serverURL)</a></dt>
 <dd><p>Initialize the Parse SDK.</p>
 </dd>
 <dt><a href="#createPointerFromId">createPointerFromId(className, objectId)</a> ⇒ <code>ParseObject</code></dt>
 <dd><p>Create a pointer to a Parse object given its id and the class name</p>
+</dd>
+<dt><a href="#getObjectWithoutParseAttributes">getObjectWithoutParseAttributes(object)</a></dt> ⇒ <code>Object</code></dt>
+<dd><p>Strip off the Parse specific attributes from an Object</p>
 </dd>
 <dt><a href="#setField">setField(parseObject, fieldName, fieldValue)</a></dt>
 <dd><p>Set the value of Parse object field (it mutates the object).</p>
@@ -46,7 +52,21 @@ This library is available on npm, install it with: `npm install --save parse-uti
 <dt><a href="#isUserInRole">isUserInRole(userId, roleName)</a> ⇒ <code>Bool</code></dt>
 <dd><p>Check if the the user is in a certain role.</p>
 </dd>
+<dt><a href="#loadClassesFromSchemas">loadClassesFromSchemas(parseServerDb, schemas, shouldUpdate)</a></dt>
+<dd><p>Given an array of schemas of classes loads them in Parse Server.</p>
+</dd>
 </dl>
+
+## setParseLib
+Set the Parse library to use (node/react-native).
+
+**Category**: Synchronous.
+
+| Param | Type | Description |
+| --- | --- | --- |
+| parseLib | <code>Object</code> | The Parse library instance. |
+
+<a name="setParseLib"></a>
 
 ## initializeParseSDK
 Initialize the Parse SDK.
@@ -61,7 +81,7 @@ Initialize the Parse SDK.
 <a name="createPointerFromId"></a>
 
 ## createPointerFromId ⇒ <code>ParseObject</code>
-Create a pointer to a Parse object given its id and the class name
+Create a pointer to a Parse object given its id and the class name.
 
 **Returns**: <code>ParseObject</code> - Pointer to the Parse object.  
 **Category**: Synchronous.
@@ -73,6 +93,18 @@ Create a pointer to a Parse object given its id and the class name
 
 <a name="setField"></a>
 
+## getObjectWithoutParseAttributes ⇒ <code>Object</code>
+Strip off the Parse specific attributes from an Object.
+
+**Returns**: <code>Object</code> - Object without the Parse specific attributes.
+**Category**: Synchronous.
+
+| Param | Type | Description |
+| --- | --- | --- |
+| object | <code>Object</code> | Plain Javascript representation of a Parse Object. |
+
+<a name="getObjectWithoutParseAttributes"></a>
+
 ## setField
 Set the value of Parse object field (it mutates the object).
 
@@ -82,7 +114,7 @@ Set the value of Parse object field (it mutates the object).
 | --- | --- | --- |
 | parseObject | <code>ParseObject</code> | The Parse object with the field that must be set. |
 | fieldName | <code>String</code> | The name of the field. |
-| fieldValue | <code>Any</code> | The value of the field. |
+| fieldValue | <code>Number,Boolean,String,Array,ParseObject</code> | The value of the field. |
 
 <a name="setPointer"></a>
 
@@ -96,7 +128,7 @@ Set the value of Parse object field to a Parse pointer (it mutates the object).
 | parseObject | <code>ParseObject</code> | The Parse object with the field that must be set. |
 | fieldName | <code>String</code> | The name of the field. |
 | pointerId | <code>String</code> | The objectId of the object pointed by the Parse pointer. |
-| pointerClassName | <code>Object</code> | The class name of the pointed object. |
+| pointerClassName | <code>String</code> | The class name of the pointed object. |
 
 <a name="setArrayOfPointers"></a>
 
@@ -110,7 +142,7 @@ Set the value of Parse object field to an array of pointers (it mutates the obje
 | parseObject | <code>ParseObject</code> | The object that with field that must be set. |
 | fieldName | <code>String</code> | The name of the field |
 | pointersIds | <code>Array.&lt;String&gt;</code> | The objectIds of the objects pointed by the Parse pointers. |
-| pointersClassName | <code>Object</code> | The class name of the pointed objects. |
+| pointersClassName | <code>String</code> | The class name of the pointed objects. |
 
 <a name="uploadFile"></a>
 
@@ -135,7 +167,7 @@ Get a User given its email.
 
 | Param | Type |
 | --- | --- |
-| email | <code>String</code> |
+| userEmail | <code>String</code> |
 
 <a name="getUserById"></a>
 
@@ -193,7 +225,7 @@ Execute a "saveAll" Parse Query splitting in chunks the saveAll instructions.
 ## createRoleIfNotExists ⇒ <code>ParseObject</code>
 Create a Role with the specified name (only if it doesn't alrady exists).
 
-**Returns**: <code>ParseObject</code> - - The created Role (undefined if the role already exists).  
+**Returns**: <code>ParseObject</code> - The created Role (undefined if the role already exists).  
 **Category**: Asynchronous.
 
 | Param | Type | Description |
@@ -203,10 +235,10 @@ Create a Role with the specified name (only if it doesn't alrady exists).
 
 <a name="isUserInRole"></a>
 
-## isUserInRole ⇒ <code>Bool</code>
+## isUserInRole ⇒ <code>Boolean</code>
 Check if the the user is in a certain role.
 
-**Returns**: <code>Bool</code> - - Is the user in the role?
+**Returns**: <code>Boolean</code> - Is the user in the role?
 **Category**: Asynchronous.
 
 | Param | Type | Description |
@@ -214,4 +246,16 @@ Check if the the user is in a certain role.
 | userId | <code>String</code> | The user objectId. |
 | roleName | <code>String</code> | The role name. |
 
-<a name="initializeParseSDK"></a>
+## loadClassesFromSchemas
+Given an array of schemas of classes loads them in Parse Server
+
+**Returns**: <code>Boolean</code> - Is the user in the role?
+**Category**: Asynchronous.
+
+| Param | Type | Description |
+| --- | --- | --- |
+| parseServerDb | <code>Object</code> | The Parse Server DB instance. |
+| schemas | <code>Array</code> | Array of schemas.
+| shouldUpdate | <code>Boolean</code> | Should the class be updated if it already exists? |
+
+<a name="loadClassesFromSchemas"></a>

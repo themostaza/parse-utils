@@ -1,10 +1,12 @@
-import { chunk, compact, flatten, isArray, isEmpty, isNil, range } from 'lodash'
+import { chunk, compact, concat, difference, flatten, isArray, isEmpty, isNil, omit, range } from 'lodash'
 
 let Parse = global.Parse
 
+const PARSE_SPECIFIC_ATTRIBUTES = ['__type', 'className', 'objectId', 'createdAt', 'updatedAt', 'ACL']
+
 /**
- * Set the Parse library to use (node/react-native)
- * @param {Object} The Parse library instance
+ * Set the Parse library to use (node/react-native).
+ * @param {Object} parseLib - The Parse library instance.
  */
 export const setParseLib = (parseLib) => {
   Parse = parseLib
@@ -22,7 +24,7 @@ export const initializeParseSDK = (appId, serverURL) => {
 }
 
 /**
- * Create a pointer to a Parse object given its id and the class name
+ * Create a pointer to a Parse object given its id and the class name.
  * @category Synchronous.
  * @param {String} className - The class name of the Parse object.
  * @param {String} objectId - The id of the Parse object.
@@ -36,15 +38,25 @@ export const createPointerFromId = (className, objectId) => {
 }
 
 /**
+ * Strip off the Parse specific attributes from an Object.
+ * @category Synchronous.
+ * @param {Object} object - Plain Javascript representation of a Parse Object.
+ * @return {Object} Object without the Parse specific attributes.
+ */
+export const getObjectWithoutParseAttributes = (object) => {
+  return omit({ ...object }, PARSE_SPECIFIC_ATTRIBUTES)
+}
+
+/**
  * Set the value of Parse object field (it mutates the object).
  * @category Synchronous.
  * @param {ParseObject} parseObject - The Parse object with the field that must be set.
  * @param {String} fieldName - The name of the field.
- * @param {Any} fieldValue - The value of the field.
+ * @param {Number|Boolean|String|Array|ParseObject} fieldValue - The value of the field.
  */
 export const setField = (parseObject, fieldName, fieldValue) => {
   if (!isNil(fieldValue)) {
-    parseObject.set(fieldName, fieldValue)
+    parseObject.set(fieldName, fieldValue, {})
   } else {
     parseObject.unset(fieldName)
   }
@@ -56,7 +68,7 @@ export const setField = (parseObject, fieldName, fieldValue) => {
  * @param {ParseObject} parseObject - The Parse object with the field that must be set.
  * @param {String} fieldName - The name of the field.
  * @param {String} pointerId - The objectId of the object pointed by the Parse pointer.
- * @param {Object} pointerClassName - The class name of the pointed object.
+ * @param {String} pointerClassName - The class name of the pointed object.
  */
 export const setPointer = (parseObject, fieldName, pointerId, pointerClassName) => {
   const pointer = createPointerFromId(pointerClassName, pointerId)
@@ -69,13 +81,13 @@ export const setPointer = (parseObject, fieldName, pointerId, pointerClassName) 
  * @param {ParseObject} parseObject - The object that with field that must be set.
  * @param {String} fieldName - The name of the field
  * @param {String[]} pointersIds - The objectIds of the objects pointed by the Parse pointers.
- * @param {Object} pointersClassName - The class name of the pointed objects.
+ * @param {String} pointersClassName - The class name of the pointed objects.
  */
 export const setArrayOfPointers = (parseObject, fieldName, pointersIds, pointersClassName) => {
   let arrayOfPointers
   if (isArray(pointersIds) && !isEmpty(pointersIds)) {
     const dirtyArrayOfPointers = pointersIds.map((objectId) => {
-      return createPointerFromId(pointersIds, objectId)
+      return createPointerFromId(pointersClassName, objectId)
     })
     arrayOfPointers = compact(dirtyArrayOfPointers)
   }
@@ -90,14 +102,13 @@ export const setArrayOfPointers = (parseObject, fieldName, pointersIds, pointers
  * @return {ParseObject} The uploaded file.
  */
 export const uploadFile = async (fileName, file) => {
-  const uploadedFile = await new Parse.File(fileName, file).save()
-  return uploadedFile
+  return await new Parse.File(fileName, file).save()
 }
 
 /**
  * Get a User given its email.
  * @category Asynchronous.
- * @param {String} email
+ * @param {String} userEmail
  * @return {ParseObject} The User object.
  */
 export const getUserByEmail = async (userEmail) => {
@@ -110,7 +121,7 @@ export const getUserByEmail = async (userEmail) => {
 /**
  * Get a User given its id.
  * @category Asynchronous.
- * @param {String} objectId
+ * @param {String} userId
  * @return {ParseObject} The User object.
  */
 export const getUserById = async (userId) => {
@@ -142,7 +153,7 @@ export const getRoleByName = async (roleName) => {
  */
 export const findAll = async (parseQuery, findOptions) => {
   const PAGE_SIZE = 500
-  const count = await parseQuery.count()
+  const count = await parseQuery.count({})
   const pagesCount = Math.ceil(count / PAGE_SIZE)
   const pages = range(0, pagesCount)
   return flatten(await Promise.all(
@@ -198,7 +209,7 @@ export const createRoleIfNotExists = async (roleName, saveOptions) => {
  * @category Asynchronous.
  * @param {String} userId - The user objectId.
  * @param {String} roleName - The role name.
- * @return {Bool} - Is the user in the role?
+ * @return {Boolean} - Is the user in the role?
  */
 export const isUserInRole = async (userId, roleName) => {
   const user = createPointerFromId('_User', userId)
@@ -209,14 +220,61 @@ export const isUserInRole = async (userId, roleName) => {
   return !isEmpty(isInRole)
 }
 
+/**
+ * Given an array of schemas of classes loads them in Parse Server.
+ * @category Asynchronous.
+ * @param {Object} parseServerDb - The Parse Server DB instance.
+ * @param {Array} schemas - Array of schemas in the format [{ name: {}, schema: {}, permissions: {} }, ...].
+ * @param {Boolean} shouldUpdate - Should the class be updated if it already exists?
+ */
+export const loadClassesFromSchemas = async(parseServerDb, schemas = [], shouldUpdate = true) => {
+  // Get the Parse Server DB Schema
+  const parseServerDbSchema = await parseServerDb.loadSchema()
+  // Function that load a class in Parse Server
+  const loadClass = async(className, classSchema, classPermissions) => {
+    try {
+      await parseServerDbSchema.addClassIfNotExists(className, classSchema)
+      await parseServerDbSchema.updateClass(className, {}, classPermissions)
+    } catch (err) {
+      if (err.code === 103) {
+        if (shouldUpdate) {
+          const mergedClassSchema = getSchemaChanges(className, classSchema)
+          await parseServerDbSchema.updateClass(className, mergedClassSchema, classPermissions)
+        }
+      } else {
+        throw err
+      }
+    }
+  }
+  // Function that sanitize a class that must be updated in Parse Server
+  const getSchemaChanges = (className, classSchema) => {
+    const deletedFields = difference(
+      Object.keys(parseServerDbSchema.data[className]),
+      concat(Object.keys(classSchema), PARSE_SPECIFIC_ATTRIBUTES)
+    )
+    const newFields = difference(
+      concat(Object.keys(classSchema), PARSE_SPECIFIC_ATTRIBUTES),
+      Object.keys(parseServerDbSchema.data[className])
+    )
+    const newClassSchema = {}
+    for (const field of deletedFields) newClassSchema[field] = { ...parseServerDbSchema.data[className][field], __op: 'Delete' }
+    for (const field of newFields) newClassSchema[field] = { ...classSchema[field], __op: 'Insert' }
+    return newClassSchema
+  }
+  // Load all the classes in Parse Server
+  await Promise.all(schemas.map(({ name, schema, permissions }) => loadClass(name, schema, permissions)))
+}
+
 export default {
   setParseLib,
   initializeParseSDK,
   uploadFile,
   createPointerFromId,
+  getObjectWithoutParseAttributes,
   getUserByEmail,
   getUserById,
   getRoleByName,
+  loadClassesFromSchemas,
   setField,
   setPointer,
   setArrayOfPointers,
