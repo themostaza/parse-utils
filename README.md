@@ -10,7 +10,7 @@ This library is available on npm, install it with: `npm install --save parse-uti
 <dt><a href="#setParseLib">setParseLib(parseLib)</a></dt>
 <dd><p>Set the Parse library to use (node/react-native).</p>
 </dd><dl>
-<dt><a href="#initializeParseSDK">initializeParseSDK(appId, serverURL)</a></dt>
+<dt><a href="#initializeParseSDK">initializeParseSDK(serverURL, appId, masterKey)</a></dt>
 <dd><p>Initialize the Parse SDK.</p>
 </dd>
 <dt><a href="#createPointerFromId">createPointerFromId(className, objectId)</a> ⇒ <code>ParseObject</code></dt>
@@ -75,8 +75,9 @@ Initialize the Parse SDK.
 
 | Param | Type |
 | --- | --- |
-| appId | <code>String</code> |
 | serverURL | <code>String</code> |
+| appId | <code>String</code> |
+| masterKey | <code>String</code> |
 
 <a name="createPointerFromId"></a>
 

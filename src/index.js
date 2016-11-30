@@ -15,11 +15,12 @@ export const setParseLib = (parseLib) => {
 /**
  * Initialize the Parse SDK.
  * @category Synchronous.
- * @param {String} appId
  * @param {String} serverURL
+ * @param {String} appId
+ * @param {String} masterKey
  */
-export const initializeParseSDK = (appId, serverURL) => {
-  Parse.initialize(appId)
+export const initializeParseSDK = (serverURL, appId, masterKey) => {
+  Parse.initialize(appId, '', masterKey)
   Parse.serverURL = serverURL
 }
 
