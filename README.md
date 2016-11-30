@@ -249,7 +249,6 @@ Check if the the user is in a certain role.
 ## loadClassesFromSchemas
 Given an array of schemas of classes loads them in Parse Server
 
-**Returns**: <code>Boolean</code> - Is the user in the role?
 **Category**: Asynchronous.
 
 | Param | Type | Description |
