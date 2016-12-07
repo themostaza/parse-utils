@@ -1,4 +1,4 @@
-/* flow */
+/* @flow */
 import { chunk, compact, concat, difference, flatten, isArray, isEmpty, isNil, omit, range } from 'lodash'
 
 let Parse = global.Parse
@@ -109,7 +109,7 @@ export const setArrayOfPointers = (parseObject: ParseObject, fieldName: string, 
  * @param {File} file
  * @return {ParseObject} The uploaded file.
  */
-export const uploadFile = async (fileName: string, file: Object): ParseObject => {
+export const uploadFile = async (fileName: string, file: Object): Promise<ParseObject> => {
   return await new Parse.File(fileName, file).save()
 }
 
@@ -119,7 +119,7 @@ export const uploadFile = async (fileName: string, file: Object): ParseObject =>
  * @param {String} userEmail
  * @return {ParseUser} The User object.
  */
-export const getUserByEmail = async (userEmail: string): ParseUser => {
+export const getUserByEmail = async (userEmail: string): Promise<ParseUser> => {
   const User = Parse.Object.extend('_User')
   return await new Parse.Query(User)
     .equalTo('email', userEmail)
@@ -132,7 +132,7 @@ export const getUserByEmail = async (userEmail: string): ParseUser => {
  * @param {String} userId
  * @return {ParseUser} The User object.
  */
-export const getUserById = async (userId: string): ParseUser => {
+export const getUserById = async (userId: string): Promise<ParseUser> => {
   const User = Parse.Object.extend('_User')
   return await new Parse.Query(User)
     .equalTo('objectId', userId)
@@ -145,7 +145,7 @@ export const getUserById = async (userId: string): ParseUser => {
  * @param {String} roleName
  * @return {ParseObject} The Role object.
  */
-export const getRoleByName = async (roleName: string): ParseRole => {
+export const getRoleByName = async (roleName: string): Promise<ParseRole> => {
   const Role = Parse.Object.extend('_Role')
   return await new Parse.Query(Role)
     .equalTo('name', roleName)
@@ -159,7 +159,7 @@ export const getRoleByName = async (roleName: string): ParseRole => {
  * @param {Object} findOptions - Options passed to the "find" function.
  * @return {ParseObject[]} The array with the found Parse objects.
  */
-export const findAll = async (parseQuery: ParseQuery, findOptions: ?Object): Array<ParseObject> => {
+export const findAll = async (parseQuery: ParseQuery, findOptions: ?Object): Promise<Array<ParseObject>> => {
   const PAGE_SIZE = 500
   const count = await parseQuery.count({})
   const pagesCount = Math.ceil(count / PAGE_SIZE)
@@ -182,7 +182,7 @@ export const findAll = async (parseQuery: ParseQuery, findOptions: ?Object): Arr
  * @param {Number} chunkSize - The chunk size of the promises.
  * @return {ParseObject[]} An array with the saved Parse Objects
  */
-export const saveAllInChunks = async (parseObjects: Array<ParseObject>, saveOptions: ?Object, chunkSize: ?number = 200): Array<ParseObject> => {
+export const saveAllInChunks = async (parseObjects: Array<ParseObject>, saveOptions: ?Object, chunkSize: ?number = 200): Promise<Array<ParseObject>> => {
   const objectsChunks = chunk(parseObjects, chunkSize)
   return await Promise.all(objectsChunks.map((obj) => Parse.Object.saveAll(obj, saveOptions)))
 }
@@ -219,9 +219,9 @@ export const createRoleIfNotExists = async (roleName: string, saveOptions: Objec
  * @param {String} roleName - The role name.
  * @return {Boolean} - Is the user in the role?
  */
-export const isUserInRole = async (userId: string, roleName: string): boolean => {
+export const isUserInRole = async (userId: string, roleName: string): Promise<boolean> => {
   const user = createPointerFromId('_User', userId)
-  const isInRole = await new Parse.Query(Parse.Role)
+  const isInRole = new Parse.Query(Parse.Role)
     .equalTo('name', roleName)
     .equalTo('users', user)
     .first()
@@ -235,7 +235,7 @@ export const isUserInRole = async (userId: string, roleName: string): boolean =>
  * @param {Array} schemas - Array of schemas in the format [{ name: {}, schema: {}, permissions: {} }, ...].
  * @param {Boolean} shouldUpdate - Should the class be updated if it already exists?
  */
-export const loadClassesFromSchemas = async (parseServerDb: Object, schemas: Array<Object> = [], shouldUpdate: ?boolean = true) => {
+export const loadClassesFromSchemas = async (parseServerDb: Object, schemas: Array<Object> = [], shouldUpdate: ?boolean = true): Promise<any> => {
   // Get the Parse Server DB Schema
   const parseServerDbSchema = await parseServerDb.loadSchema()
   // Function that load a class in Parse Server
