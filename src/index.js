@@ -3,8 +3,6 @@ import { chunk, compact, concat, difference, flatten, isArray, isEmpty, isNil, o
 
 let Parse = global.Parse
 
-const PARSE_SPECIFIC_ATTRIBUTES = ['__type', 'className', 'objectId', 'createdAt', 'updatedAt', 'ACL']
-
 type ParseObject = Object
 type ParseUser = Object
 type ParsePointer = Object
@@ -52,6 +50,7 @@ export const createPointerFromId = (className: string, objectId: string): ParseP
  * @return {Object} Object without the Parse specific attributes.
  */
 export const getObjectWithoutParseAttributes = (object: Object): Object => {
+  const PARSE_SPECIFIC_ATTRIBUTES = ['__type', 'className', 'objectId', 'createdAt', 'updatedAt', 'ACL']
   return omit({ ...object }, PARSE_SPECIFIC_ATTRIBUTES)
 }
 
@@ -247,7 +246,7 @@ export const loadClassesFromSchemas = async (parseServerDb: Object, schemas: Arr
       if (err.code === 103) {
         if (shouldUpdate) {
           const mergedClassSchema = getSchemaChanges(className, classSchema)
-          await parseServerDbSchema.updateClass(className, mergedClassSchema, classPermissions)
+          await parseServerDbSchema.updateClass(className, mergedClassSchema, classPermissions, parseServerDb)
         }
       } else {
         throw err
@@ -256,12 +255,15 @@ export const loadClassesFromSchemas = async (parseServerDb: Object, schemas: Arr
   }
   // Function that sanitize a class that must be updated in Parse Server
   const getSchemaChanges = (className, classSchema) => {
+    const IGNORED_FIELDS = (className !== '_User')
+      ? ['objectId', 'createdAt', 'updatedAt', 'ACL']
+      : ['objectId', 'createdAt', 'updatedAt', 'ACL', 'emailVerified', 'authData', 'username', 'password', 'email']
     const deletedFields = difference(
       Object.keys(parseServerDbSchema.data[className]),
-      concat(Object.keys(classSchema), PARSE_SPECIFIC_ATTRIBUTES)
+      concat(Object.keys(classSchema), IGNORED_FIELDS)
     )
     const newFields = difference(
-      concat(Object.keys(classSchema), PARSE_SPECIFIC_ATTRIBUTES),
+      concat(Object.keys(classSchema), IGNORED_FIELDS),
       Object.keys(parseServerDbSchema.data[className])
     )
     const newClassSchema = {}
