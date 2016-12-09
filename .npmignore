@@ -1,1 +1,4 @@
 /src/
+.babelrc
+.eslintrc
+.jsdoc.json
