@@ -24,7 +24,7 @@ export const setParseLib = (parseLib: Object) => {
  * @param {String} appId
  * @param {String} masterKey
  */
-export const initializeParseSDK = (serverURL: string, appId: string, masterKey: string): void => {
+export const initializeParseSDK = (serverURL: string, appId: string, masterKey: ?string): void => {
   Parse.initialize(appId, '', masterKey)
   Parse.serverURL = serverURL
 }
