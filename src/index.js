@@ -203,9 +203,9 @@ const _deleteChunk = async (parseQuery: ParseQuery, options: ?Object): Promise<a
  * @param {Number} chunkSize - The chunk size of the promises.
  * @return {ParseObject[]} An array with the saved Parse Objects
  */
-export const saveAllInChunks = async (parseObjects: Array<ParseObject>, saveOptions: ?Object, chunkSize: ?number = 200): Promise<Array<ParseObject>> => {
+export const saveAllInChunks = async (parseObjects: Array<ParseObject>, options: ?Object, chunkSize: ?number = 200): Promise<Array<ParseObject>> => {
   const objectsChunks = chunk(parseObjects, chunkSize)
-  return await Promise.all(objectsChunks.map((obj) => Parse.Object.saveAll(obj, saveOptions)))
+  return await Promise.all(objectsChunks.map((obj) => Parse.Object.saveAll(obj, options)))
 }
 
 /**
@@ -302,6 +302,7 @@ export default {
   initializeParseSDK,
   uploadFile,
   createPointerFromId,
+  deleteAllByQuery,
   getObjectWithoutParseAttributes,
   getUserByEmail,
   getUserById,
