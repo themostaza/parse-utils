@@ -244,12 +244,12 @@ export const createRoleIfNotExists = async (roleName: string, saveOptions: Objec
 export const isUserInRole = async (userId: string, roleName: ?string, roleId: ?string): Promise<boolean> => {
   const user = createPointerFromId('_User', userId)
   const roleQuery = new Parse.Query(Parse.Role)
-    .equalTo('users', user)
+  roleQuery.equalTo('users', user)
 
   if (roleName) {
     roleQuery.equalTo('name', roleName)
   } else {
-    roleQuery.equalTo('id', roleId)
+    roleQuery.equalTo('objectId', roleId)
   }
 
   const isInRole = await roleQuery.first()
