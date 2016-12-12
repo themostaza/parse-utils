@@ -155,10 +155,10 @@ export const getRoleByName = async (roleName: string): Promise<ParseRole> => {
  * Execute a "find" Parse Query regardless of the limit imposed by Parse (which is 500).
  * @category Asynchronous.
  * @param {ParseQuery} parseQuery - The "find" Parse Query that will be executed.
- * @param {Object} findOptions - Options passed to the "find" function.
+ * @param {Object} options - Options passed to the "find" function.
  * @return {ParseObject[]} The array with the found Parse objects.
  */
-export const findAll = async (parseQuery: ParseQuery, findOptions: ?Object): Promise<Array<ParseObject>> => {
+export const findAll = async (parseQuery: ParseQuery, options: ?Object): Promise<Array<ParseObject>> => {
   const PAGE_SIZE = 500
   const count = await parseQuery.count({})
   const pagesCount = Math.ceil(count / PAGE_SIZE)
@@ -168,9 +168,26 @@ export const findAll = async (parseQuery: ParseQuery, findOptions: ?Object): Pro
       return parseQuery
         .skip(page * PAGE_SIZE)
         .limit(PAGE_SIZE)
-        .find(findOptions)
+        .find(options)
     })
   ))
+}
+
+/**
+ * Execute a "destroyAll" Parse Query without the limitation imposed by Parse.
+ * @category Asynchronous.
+ * @param {ParseQuery} parseQuery - The "destroy" Parse Query that will be executed.
+ * @param {Object} options - Options passed to the "find" and "destroyAll" functions.
+ * @return {ParseObject[]} The array with the found Parse objects. TODO
+ */
+export const deleteAllByQuery = async (parseQuery: ParseQuery, options: ?Object): Promise<any> => {
+  const deleteChunk = async(query) => {
+    const objectsToDelete = await query.find(options)
+    const deletedObjects = await Parse.Object.destroyAll(objectsToDelete, options)
+    return deletedObjects.length
+  }
+  const count = await deleteChunk(parseQuery)
+  return (count) ? await deleteAllByQuery(parseQuery) : Parse.Promise.as()
 }
 
 /**
