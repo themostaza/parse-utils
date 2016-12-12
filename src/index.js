@@ -237,15 +237,22 @@ export const createRoleIfNotExists = async (roleName: string, saveOptions: Objec
  * Check if the the user is in a certain role.
  * @category Asynchronous.
  * @param {String} userId - The user objectId.
- * @param {String} roleName - The role name.
+ * @param {String} roleName - The role name (either this or roleId).
+ * @param {String} roleId - The role id (either this or roleName).
  * @return {Boolean} - Is the user in the role?
  */
-export const isUserInRole = async (userId: string, roleName: string): Promise<boolean> => {
+export const isUserInRole = async (userId: string, roleName: ?string, roleId: ?string): Promise<boolean> => {
   const user = createPointerFromId('_User', userId)
-  const isInRole = new Parse.Query(Parse.Role)
-    .equalTo('name', roleName)
+  const roleQuery = new Parse.Query(Parse.Role)
     .equalTo('users', user)
-    .first()
+
+  if (roleName) {
+    roleQuery.equalTo('name', roleName)
+  } else {
+    roleQuery.equalTo('id', roleId)
+  }
+
+  const isInRole = await roleQuery.first()
   return !isEmpty(isInRole)
 }
 
