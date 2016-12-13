@@ -185,8 +185,8 @@ export const deleteAllByQuery = async (parseQuery: ParseQuery, options: ?Object)
 }
 
 const _destroyAll = async (parseQuery: ParseQuery, options: ?Object): Promise<any> => {
-  const count = await _deleteChunk(parseQuery)
-  return (count) ? await _destroyAll(parseQuery) : Parse.Promise.as()
+  const count = await _deleteChunk(parseQuery, options)
+  return (count) ? await _destroyAll(parseQuery, options) : Parse.Promise.as()
 }
 
 const _deleteChunk = async (parseQuery: ParseQuery, options: ?Object): Promise<any> => {
