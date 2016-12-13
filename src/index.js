@@ -181,7 +181,7 @@ export const findAll = async (parseQuery: ParseQuery, options: ?Object): Promise
  * @return {ParseObject[]} The array with the found Parse objects. TODO
  */
 export const deleteAllByQuery = async (parseQuery: ParseQuery, options: ?Object): Promise<any> => {
-  return await _destroyAll(parseQuery.limit(500))
+  return await _destroyAll(parseQuery.limit(500), options)
 }
 
 const _destroyAll = async (parseQuery: ParseQuery, options: ?Object): Promise<any> => {
@@ -205,7 +205,12 @@ const _deleteChunk = async (parseQuery: ParseQuery, options: ?Object): Promise<a
  */
 export const saveAllInChunks = async (parseObjects: Array<ParseObject>, options: ?Object, chunkSize: ?number = 200): Promise<Array<ParseObject>> => {
   const objectsChunks = chunk(parseObjects, chunkSize)
-  return await Promise.all(objectsChunks.map((obj) => Parse.Object.saveAll(obj, options)))
+  const result = []
+  for (const singleChunk of objectsChunks) {
+    const chunkResult = await Parse.Object.saveAll(singleChunk, options)
+    result.push(chunkResult)
+  }
+  return result
 }
 
 /**
