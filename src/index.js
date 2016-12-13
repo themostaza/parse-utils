@@ -155,12 +155,12 @@ export const getRoleByName = async (roleName: string): Promise<ParseRole> => {
  * Execute a "find" Parse Query regardless of the limit imposed by Parse (which is 500).
  * @category Asynchronous.
  * @param {ParseQuery} parseQuery - The "find" Parse Query that will be executed.
- * @param {Object} options - Options passed to the "find" function.
+ * @param {Object} options - Options passed to the "find" and "count" functions.
  * @return {ParseObject[]} The array with the found Parse objects.
  */
 export const findAll = async (parseQuery: ParseQuery, options: ?Object): Promise<Array<ParseObject>> => {
   const PAGE_SIZE = 500
-  const count = await parseQuery.count({})
+  const count = await parseQuery.count(options)
   const pagesCount = Math.ceil(count / PAGE_SIZE)
   const pages = range(0, pagesCount)
   return flatten(await Promise.all(
