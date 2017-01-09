@@ -1,6 +1,6 @@
 {
   "name": "parse-utils",
-  "version": "2.12.0",
+  "version": "2.12.1",
   "description": "Parse JS SDK and Parse-Server utilities",
   "main": "lib/index.js",
   "scripts": {
