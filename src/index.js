@@ -203,8 +203,8 @@ const _deleteChunk = async (parseQuery: ParseQuery, options: ?Object): Promise<a
  * @param {Number} chunkSize - The chunk size of the promises.
  * @return {ParseObject[]} An array with the saved Parse Objects
  */
-export const saveAllInChunks = async (parseObjects: Array<ParseObject>, options: ?Object, chunkSize: ?number = 200): Promise<Array<ParseObject>> => {
-  const objectsChunks = chunk(parseObjects, chunkSize)
+export const saveAllInChunks = async (parseObjects: Array<ParseObject>, options: ?Object, chunkSize: ?number): Promise<Array<ParseObject>> => {
+  const objectsChunks = chunk(parseObjects, chunkSize || 200)
   const result = []
   for (const singleChunk of objectsChunks) {
     const chunkResult = await Parse.Object.saveAll(singleChunk, options)
